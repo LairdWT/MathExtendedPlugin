@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-MathExtended.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:\c_plus_plus\MathExtendedPlugin\Intermediate\Build\Win64\MathExtendedPluginEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.obj"
+"D:\c_plus_plus\MathExtendedPlugin\Plugins\MathExtended\Intermediate\Build\Win64\UnrealEditor\Development\MathExtended\Module.MathExtended.cpp.obj"
+"D:\c_plus_plus\MathExtendedPlugin\Plugins\MathExtended\Intermediate\Build\Win64\UnrealEditor\Development\MathExtended\Module.MathExtended.gen.cpp.obj"
+"D:\c_plus_plus\MathExtendedPlugin\Plugins\MathExtended\Intermediate\Build\Win64\UnrealEditor\Development\MathExtended\Default.rc2.res"
+/OUT:"D:\c_plus_plus\MathExtendedPlugin\Plugins\MathExtended\Intermediate\Build\Win64\UnrealEditor\Development\MathExtended\UnrealEditor-MathExtended.lib"

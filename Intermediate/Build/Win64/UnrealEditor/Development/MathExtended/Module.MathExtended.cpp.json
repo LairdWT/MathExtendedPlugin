@@ -1,0 +1,18 @@
+{
+    "Version": "1.1",
+    "Data": {
+        "Source": "d:\\c_plus_plus\\mathextendedplugin\\plugins\\mathextended\\intermediate\\build\\win64\\unrealeditor\\development\\mathextended\\module.mathextended.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\c_plus_plus\\mathextendedplugin\\intermediate\\build\\win64\\mathextendedplugineditor\\development\\engine\\sharedpch.engine.shadowerrors.h.pch",
+        "Includes": [
+            "d:\\c_plus_plus\\mathextendedplugin\\plugins\\mathextended\\intermediate\\build\\win64\\unrealeditor\\development\\mathextended\\definitions.mathextended.h",
+            "d:\\c_plus_plus\\mathextendedplugin\\plugins\\mathextended\\source\\mathextended\\private\\mathextended.cpp",
+            "d:\\c_plus_plus\\mathextendedplugin\\plugins\\mathextended\\source\\mathextended\\public\\mathextended.h",
+            "d:\\c_plus_plus\\mathextendedplugin\\plugins\\mathextended\\source\\mathextended\\private\\mathextendedbplibrary.cpp",
+            "d:\\c_plus_plus\\mathextendedplugin\\plugins\\mathextended\\source\\mathextended\\public\\mathextendedbplibrary.h",
+            "d:\\c_plus_plus\\mathextendedplugin\\plugins\\mathextended\\intermediate\\build\\win64\\unrealeditor\\inc\\mathextended\\mathextendedbplibrary.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

@@ -1,0 +1,25 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "MathExtended",
+	"Description": "A library that extends the math functions available in Blueprint",
+	"Category": "Other",
+	"CreatedBy": "Laird Shingleton",
+	"CreatedByURL": "www.github.com/Lairdwt",
+	"DocsURL": "",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/...",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "MathExtended",
+			"Type": "Runtime",
+			"LoadingPhase": "PreLoadingScreen"
+		}
+	],
+	"SupportedPlatforms": [ "Win64", "Android" ]
+}

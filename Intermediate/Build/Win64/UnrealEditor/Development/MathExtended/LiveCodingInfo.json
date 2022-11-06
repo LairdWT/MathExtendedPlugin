@@ -1,0 +1,13 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.MathExtended.cpp.obj": [
+			"MathExtended.cpp.obj",
+			"MathExtendedBPLibrary.cpp.obj"
+		],
+		"Module.MathExtended.gen.cpp.obj": [
+			"MathExtended.init.gen.cpp.obj",
+			"MathExtendedBPLibrary.gen.cpp.obj"
+		]
+	}
+}
