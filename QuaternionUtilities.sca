@@ -1,0 +1,270 @@
+// Created by Laird Shingleton
+
+#import <gradients>
+#import <sdf>
+
+//      Constants
+const float Pi = 3.1415926535897932;
+const float Tau = 2.0 * Pi;
+const float HalfPi = 0.5 * Pi;
+const float DegToRad = Pi / 180.0;
+const float RadToDeg = 180.0 / Pi;
+
+
+//      Operations
+
+// Normalize a quaternion to unit length
+vec4 NormalizeQuaternion(vec4 quaternion)
+{
+    float length = sqrt((quaternion.x * quaternion.x) + 
+                              (quaternion.y * quaternion.y) + 
+                              (quaternion.z * quaternion.z) + 
+                              (quaternion.w * quaternion.w)
+                              );
+    
+    return vec4(quaternion.x / length, quaternion.y / length, quaternion.z / length, quaternion.w / length);
+}
+
+// multiply two quaternions together
+// order matters, quaternionA * quaternionB != quaternionB * quaternionA
+vec4 QuaternionMultiply(vec4 quaternionA, vec4 quaternionB)
+{
+  return vec4(
+            (quaternionA.w * quaternionB.x) + (quaternionA.x * quaternionB.w) + (quaternionA.y * quaternionB.z) - (quaternionA.z * quaternionB.y),
+            (quaternionA.w * quaternionB.y) - (quaternionA.x * quaternionB.z) + (quaternionA.y * quaternionB.w) + (quaternionA.z * quaternionB.x),
+            (quaternionA.w * quaternionB.z) + (quaternionA.x * quaternionB.y) - (quaternionA.y * quaternionB.x) + (quaternionA.z * quaternionB.w),
+            (quaternionA.w * quaternionB.w) - (quaternionA.x * quaternionB.x) - (quaternionA.y * quaternionB.y) - (quaternionA.z * quaternionB.z)
+            );
+}
+
+// returns the conjugate of a quaternion 
+// if the quaternion is normalized, this is the same as the inverse of the quaternion
+vec4 ConjugateQuaternion(vec4 quaternion)
+{
+    return vec4(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w);
+}
+
+// rotate a vector using a given quaternion, inputs must be unit length (normalized)
+vec4 RotateVectorByQuaternion(vec3 vector, vec4 quaternion)
+{
+    vec4 result = QuaternionMultiply(quaternion, vec4(vector, 0.0));
+    result = QuaternionMultiply(result, ConjugateQuaternion(quaternion));
+
+    return result;
+}
+
+
+//      Swizzle a quaternions to rotate around a given axis (cheaper than multiplying)
+
+// rotate quaternion 90 degrees around principal axis, input must be length 1 (normalized)
+// this is the same as multiplying by a quaternion representing a 90 degree rotation around the given axis
+vec4 RotateQuaternion90AroundX(vec4 quaternion)
+{
+    return vec4(quaternion.w, -quaternion.z, quaternion.y, -quaternion.x);
+}
+
+vec4 RotateQuaternion90AroundY(vec4 quaternion)
+{
+    return vec4(quaternion.z, quaternion.w, -quaternion.x, -quaternion.y);
+}
+
+vec4 RotateQuaternion90AroundZ(vec4 quaternion)
+{
+    return vec4(-quaternion.y, quaternion.x, quaternion.w, -quaternion.z);
+}
+
+// rotate quaternion 180 degrees around principal axis, input must be length 1 (normalized)
+// this is the same as multiplying by a quaternion representing a 180 degree rotation around the given axis
+vec4 RotateQuaternion180AroundX(vec4 quaternion)
+{
+    return vec4(quaternion.w, quaternion.z, -quaternion.y, -quaternion.x);
+}
+
+vec4 RotateQuaternion180AroundY(vec4 quaternion)
+{
+    return vec4(-quaternion.z, quaternion.w, quaternion.x, -quaternion.y);
+}
+
+vec4 RotateQuaternion180AroundZ(vec4 quaternion)
+{
+    return vec4(quaternion.y, -quaternion.x, quaternion.w, -quaternion.z);
+}
+
+
+//    Conversions
+
+// returns a quaternion representing a rotation around a given axis
+vec4 QuaternionFromAxisAngle(vec3 axis, float angle) // angle in radians
+{
+  float halfAngle = angle * 0.5;
+  float sinHalfAngle = sin(halfAngle);
+
+  return vec4(axis.x * sinHalfAngle, axis.y * sinHalfAngle, axis.z * sinHalfAngle, cos(halfAngle));
+}
+
+// create an axis angle from a quaternion
+// returns a vec4(x, y, z, angle) where angle is in radians
+vec4 AxisAngleFromQuaternion(vec4 quaternion)
+{
+  vec4 axisAngle;
+  float sinHalfAngleSquared = 1.0 - quaternion.w * quaternion.w;
+  float sinHalfAngle = sqrt(sinHalfAngleSquared);
+
+  float factor = (sinHalfAngleSquared > 0.0) ? (1.0 / sinHalfAngle) : 0.0;
+
+  axisAngle.x = quaternion.x * factor;
+  axisAngle.y = quaternion.y * factor;
+  axisAngle.z = quaternion.z * factor;
+  axisAngle.w = 2.0 * acos(quaternion.w);
+
+  return axisAngle;
+}
+
+// convert euler angles (radians) to a quaternion
+vec4 EulerRadiansToQuaternion(float pitchAngle, float yawAngle, float rollAngle) // angles in radians
+{
+    float halfRoll = rollAngle * 0.5;
+    float halfPitch = pitchAngle * 0.5;
+    float halfYaw = yawAngle * 0.5;
+
+    float sinHalfRoll = sin(halfRoll);
+    float cosHalfRoll = cos(halfRoll);
+    float sinHalfPitch = sin(halfPitch);
+    float cosHalfPitch = cos(halfPitch);
+    float sinHalfYaw = sin(halfYaw);
+    float cosHalfYaw = cos(halfYaw);
+
+    return vec4(
+                cosHalfYaw * sinHalfPitch * cosHalfRoll + sinHalfYaw * cosHalfPitch * sinHalfRoll,
+                sinHalfYaw * cosHalfPitch * cosHalfRoll - cosHalfYaw * sinHalfPitch * sinHalfRoll,
+                cosHalfYaw * cosHalfPitch * sinHalfRoll - sinHalfYaw * sinHalfPitch * cosHalfRoll,
+                cosHalfYaw * cosHalfPitch * cosHalfRoll + sinHalfYaw * sinHalfPitch * sinHalfRoll
+              );
+}
+
+// convert euler angles (degrees) to a quaternion
+vec4 EulerDegreesToQuaternion(float pitchAngle, float yawAngle, float rollAngle) // angles in degrees
+{
+    float halfRoll = rollAngle * DegToRad * 0.5;
+    float halfPitch = pitchAngle * DegToRad * 0.5;
+    float halfYaw = yawAngle * DegToRad * 0.5;
+
+    float sinHalfRoll = sin(halfRoll);
+    float cosHalfRoll = cos(halfRoll);
+    float sinHalfPitch = sin(halfPitch);
+    float cosHalfPitch = cos(halfPitch);
+    float sinHalfYaw = sin(halfYaw);
+    float cosHalfYaw = cos(halfYaw);
+
+    return vec4(
+                cosHalfYaw * sinHalfPitch * cosHalfRoll + sinHalfYaw * cosHalfPitch * sinHalfRoll,
+                sinHalfYaw * cosHalfPitch * cosHalfRoll - cosHalfYaw * sinHalfPitch * sinHalfRoll,
+                cosHalfYaw * cosHalfPitch * sinHalfRoll - sinHalfYaw * sinHalfPitch * cosHalfRoll,
+                cosHalfYaw * cosHalfPitch * cosHalfRoll + sinHalfYaw * sinHalfPitch * sinHalfRoll
+              );
+}
+
+// convert a column major 3x3 matrix to a quaternion
+vec4 MatrixToQuaternion(mat3 matrix)
+{
+    float trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
+    float S, W, X, Y, Z;
+
+    // trace is greater than zero, then quaternion is just w, x, y, z
+    if (trace > 0.0) 
+    {
+        S = sqrt(trace + 1.0) * 2.0;
+        W = 0.25 * S;
+        X = (matrix[2][1] - matrix[1][2]) / S;
+        Y = (matrix[0][2] - matrix[2][0]) / S;
+        Z = (matrix[1][0] - matrix[0][1]) / S;
+        return vec4(X, Y, Z, W);
+    }
+
+    // trace is less than or equal to zero, then identify which major diagonal element has the greatest value
+    if (matrix[0][0] > matrix[1][1] && matrix[0][0] > matrix[2][2])
+    {
+        S = sqrt(1.0 + matrix[0][0] - matrix[1][1] - matrix[2][2]) * 2.0;
+        W = (matrix[2][1] - matrix[1][2]) / S;
+        X = 0.25 * S;
+        Y = (matrix[0][1] + matrix[1][0]) / S;
+        Z = (matrix[0][2] + matrix[2][0]) / S;
+        return vec4(X, Y, Z, W);
+    }
+
+    // if diagonal element [1][1] is the greatest value
+    if (matrix[1][1] > matrix[2][2])
+    {
+        S = sqrt(1.0 + matrix[1][1] - matrix[0][0] - matrix[2][2]) * 2.0;
+        W = (matrix[0][2] - matrix[2][0]) / S;
+        X = (matrix[0][1] + matrix[1][0]) / S;
+        Y = 0.25 * S;
+        Z = (matrix[1][2] + matrix[2][1]) / S;
+        return vec4(X, Y, Z, W);
+    }
+
+    // default case, diagonal element [2][2] is the greatest value
+    S = sqrt(1.0 + matrix[2][2] - matrix[0][0] - matrix[1][1]) * 2.0;
+    W = (matrix[1][0] - matrix[0][1]) / S;
+    X = (matrix[0][2] + matrix[2][0]) / S;
+    Y = (matrix[1][2] + matrix[2][1]) / S;
+    Z = 0.25 * S;
+    return vec4(X, Y, Z, W);
+}
+
+// convert a quaternion to a column major 3x3 matrix
+mat3 QuaternionToMatrix3(vec4 quaternion)
+{
+    float xx = quaternion.x * quaternion.x;
+    float yy = quaternion.y * quaternion.y;
+    float zz = quaternion.z * quaternion.z;
+    float xy = quaternion.x * quaternion.y;
+    float xz = quaternion.x * quaternion.z;
+    float yz = quaternion.y * quaternion.z;
+    float wx = quaternion.w * quaternion.x;
+    float wy = quaternion.w * quaternion.y;
+    float wz = quaternion.w * quaternion.z;
+
+    return mat3(
+                1.0 - 2.0 * (yy + zz), 2.0 * (xy - wz),       2.0 * (xz + wy),
+                2.0 * (xy + wz),       1.0 - 2.0 * (xx + zz), 2.0 * (yz - wx),
+                2.0 * (xz - wy),       2.0 * (yz + wx),       1.0 - 2.0 * (xx + yy)
+              );
+}
+
+// convert a 3x3 matrix to a 4x4 matrix
+mat4 Matrix3ToMatrix4(mat3 matrix)
+{
+    return mat4(
+                vec4(matrix[0], 0.0),
+                vec4(matrix[1], 0.0),
+                vec4(matrix[2], 0.0),
+                vec4(0.0, 0.0, 0.0, 1.0)
+              );
+}
+
+// extract a 3x3 matrix from a 4x4 matrix
+mat3 ExtractMatrix3(mat4 matrix)
+{
+    return mat3(
+                matrix[0].xyz,
+                matrix[1].xyz,
+                matrix[2].xyz
+              );
+}
+
+// Entry point of the shader code asset
+//
+// @param[default=#00FFFFFF] color1
+// @param[default=#0000C0FF] color2
+// @param[default=5.0,min=4.0,max=9.0] armCount
+// @return color
+vec4 main(vec4 color1, vec4 color2, float armCount, out vec4 Rotation) 
+{
+  vec4 position = vec4(std::getModelViewMatrix()[3].xyz, 0.0);
+
+  Rotation = vec4(90.0, 0.0, 0.0, 0.0);
+
+  vec4 color = vec4(0.5, 0.5, 0.5, 1.0);
+  return color;
+}
